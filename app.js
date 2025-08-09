@@ -13,6 +13,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/admin', adminRoutes);
 app.use('/profile', profileRoutes);
 app.use('/mentors', mentorRoutes);
 app.use('/bookings', bookingRoutes);
+app.use('/chat', chatRoutes);
 
 // Central error handler
 app.use(errorHandler);
