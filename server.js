@@ -1,37 +1,19 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
+require('dotenv').config();
+const http = require('http');
+const app = require('./app');
+const connectToDatabase = require('./config/db');
 
-dotenv.config();
+const PORT = process.env.PORT || 5000;
 
-const app = express();
-const port = process.env.PORT || 5000;
-const corsOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
-
-app.use(cors({ origin: corsOrigin }));
-app.use(express.json());
-
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "SkillSpher backend" });
-});
-
-async function connectToDatabase() {
-  const mongoUri = process.env.MONGODB_URI;
-  if (!mongoUri) {
-    console.warn("MONGODB_URI is not set. Skipping MongoDB connection.");
-    return;
-  }
+(async () => {
   try {
-    await mongoose.connect(mongoUri, { dbName: process.env.DB_NAME || "skillsphere" });
-    console.log("Connected to MongoDB");
+    await connectToDatabase();
+    const server = http.createServer(app);
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   } catch (error) {
-    console.error("MongoDB connection error:", error.message);
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
   }
-}
-
-connectToDatabase().then(() => {
-  app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-  });
-});
+})(); 
