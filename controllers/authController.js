@@ -345,7 +345,7 @@ exports.googleCallback = async (req, res, next) => {
 
 exports.me = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).select('_id name email roles isApproved createdAt updatedAt');
+    const user = await User.findById(req.user.id).select('-password -refreshTokenHash');
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }

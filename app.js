@@ -10,6 +10,9 @@ require('./config/passport');
 
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const mentorRoutes = require('./routes/mentorRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -30,6 +33,9 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
+app.use('/profile', profileRoutes);
+app.use('/mentors', mentorRoutes);
+app.use('/bookings', bookingRoutes);
 
 // Central error handler
 app.use(errorHandler);
