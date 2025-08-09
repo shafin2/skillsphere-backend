@@ -53,6 +53,26 @@ exports.signup = async (req, res, next) => {
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
+      // Allow mentor role upgrade on existing accounts
+      if (role === 'mentor') {
+        // If user already has mentor role
+        if (Array.isArray(existing.roles) && existing.roles.includes('mentor')) {
+          return res.status(409).json({ success: false, message: 'Mentor role already requested or active for this account' });
+        }
+        // For email/password accounts, verify ownership by checking provided password matches existing
+        if (existing.password) {
+          const isMatch = await bcrypt.compare(password, existing.password);
+          if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Account already exists. Please log in and request mentor upgrade.' });
+          }
+          existing.roles = Array.from(new Set([...(existing.roles || []), 'mentor']));
+          existing.isApproved = false;
+          await existing.save();
+          return res.status(200).json({ success: true, message: 'Mentor application pending approval. You can log in once approved.' });
+        }
+        // For Google-only accounts, instruct to use Google to add mentor role
+        return res.status(400).json({ success: false, message: 'This account uses Google sign-in. Use Google to add mentor role.' });
+      }
       return res.status(409).json({ success: false, message: 'Email already in use' });
     }
 
@@ -122,11 +142,11 @@ exports.login = async (req, res, next) => {
     }
 
     if (!user.isEmailVerified && !user.roles?.includes('admin')) {
-      return res.status(403).json({ success: false, message: 'Please verify your email before logging in' });
+      return res.status(403).json({ success: false, code: 'EMAIL_NOT_VERIFIED', message: 'Please verify your email before logging in' });
     }
 
     if (user.roles?.includes('mentor') && !user.isApproved) {
-      return res.status(403).json({ success: false, message: 'Mentor application pending approval' });
+      return res.status(403).json({ success: false, code: 'MENTOR_NOT_APPROVED', message: 'Mentor application pending approval' });
     }
 
     const accessToken = generateAccessToken(user);
@@ -299,7 +319,7 @@ exports.googleCallback = async (req, res, next) => {
     }
 
     if (user.roles?.includes('mentor') && !user.isApproved) {
-      return res.redirect(302, `${process.env.CLIENT_URL}/login?error=mentor_pending_approval`);
+      return res.redirect(302, `${process.env.CLIENT_URL}/pending-approval`);
     }
 
     // Consider Google emails as verified
