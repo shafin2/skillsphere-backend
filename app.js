@@ -9,6 +9,7 @@ require('dotenv').config();
 require('./config/passport');
 
 const authRoutes = require('./routes/authRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 // Central error handler
 app.use(errorHandler);

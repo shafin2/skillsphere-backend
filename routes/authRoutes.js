@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const authController = require('../controllers/authController');
-const { protect, restrictTo } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -38,10 +38,5 @@ router.get(
   }),
   authController.googleCallback
 );
-
-// Admin mentor approval routes
-router.get('/admin/mentors', protect, restrictTo('admin'), authController.listMentors);
-router.post('/admin/mentors/:id/approve', protect, restrictTo('admin'), authController.approveMentor);
-router.post('/admin/mentors/:id/reject', protect, restrictTo('admin'), authController.rejectMentor);
 
 module.exports = router; 

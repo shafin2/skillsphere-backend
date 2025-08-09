@@ -110,9 +110,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    if (user.roles?.includes('admin')) {
-      return res.status(403).json({ success: false, message: 'Admin cannot sign in' });
-    }
+    // Admin login allowed (admin is seeded)
 
     if (!user.password) {
       return res.status(400).json({ success: false, message: 'Account uses Google sign-in. Use Google to log in.' });
@@ -123,7 +121,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    if (!user.isEmailVerified) {
+    if (!user.isEmailVerified && !user.roles?.includes('admin')) {
       return res.status(403).json({ success: false, message: 'Please verify your email before logging in' });
     }
 
