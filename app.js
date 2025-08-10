@@ -14,6 +14,9 @@ const profileRoutes = require('./routes/profileRoutes');
 const mentorRoutes = require('./routes/mentorRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const callRoutes = require('./routes/callRoutes');
+const transcriptRoutes = require('./routes/transcriptRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -38,6 +41,9 @@ app.use('/profile', profileRoutes);
 app.use('/mentors', mentorRoutes);
 app.use('/bookings', bookingRoutes);
 app.use('/chat', chatRoutes);
+app.use('/call', callRoutes);
+app.use('/transcript', transcriptRoutes);
+app.use('/feedback', feedbackRoutes);
 
 // Central error handler
 app.use(errorHandler);

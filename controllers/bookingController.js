@@ -210,4 +210,47 @@ exports.cancelBooking = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+/**
+ * PUT /bookings/:id/complete
+ * Mark a booking as completed (either party can mark as completed)
+ */
+exports.completeBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const booking = await Booking.findById(id);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Booking not found' });
+    }
+
+    // Only mentor or learner involved in the booking can mark as completed
+    const isMentor = booking.mentorId.toString() === userId;
+    const isLearner = booking.learnerId.toString() === userId;
+
+    if (!isMentor && !isLearner) {
+      return res.status(403).json({ success: false, message: 'You can only complete your own bookings' });
+    }
+
+    if (booking.status !== 'confirmed') {
+      return res.status(400).json({ success: false, message: 'Only confirmed bookings can be marked as completed' });
+    }
+
+    booking.status = 'completed';
+    await booking.save();
+
+    const updatedBooking = await Booking.findById(id)
+      .populate('mentorId', 'fullName avatar')
+      .populate('learnerId', 'fullName avatar');
+
+    return res.json({
+      success: true,
+      message: 'Booking marked as completed successfully',
+      booking: updatedBooking
+    });
+  } catch (error) {
+    next(error);
+  }
 }; 

@@ -12,6 +12,7 @@ router.post('/', bookingController.createBooking);
 router.get('/', bookingController.getMyBookings);
 router.put('/:id/confirm', bookingController.confirmBooking);
 router.put('/:id/reject', bookingController.rejectBooking);
+router.put('/:id/complete', bookingController.completeBooking);
 router.delete('/:id', bookingController.cancelBooking);
 
 module.exports = router; 
