@@ -8,6 +8,9 @@ const router = express.Router();
 router.use(protect);
 
 // Booking routes
+router.get('/available-slots/:mentorId', bookingController.getAvailableSlots);
+router.get('/notifications', bookingController.getNotifications);
+router.put('/notifications/:id/read', bookingController.markNotificationAsRead);
 router.post('/', bookingController.createBooking);
 router.get('/', bookingController.getMyBookings);
 router.put('/:id/confirm', bookingController.confirmBooking);

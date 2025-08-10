@@ -13,7 +13,7 @@ exports.getMentorById = async (req, res, next) => {
       roles: { $in: ['mentor'] },
       isApproved: true,
       isProfileComplete: true
-    }).select('_id fullName bio avatar skills expertise hourlyRate timezone experience socialLinks availability').lean();
+    }).select('_id fullName bio avatar skills expertise hourlyRate timezone experience socialLinks availability isApproved').lean();
 
     if (!mentor) {
       return res.status(404).json({ success: false, message: 'Mentor not found' });
@@ -81,7 +81,7 @@ exports.getMentors = async (req, res, next) => {
     }
     if (Object.keys(hourly).length) query.hourlyRate = hourly;
 
-    const projection = '_id fullName bio avatar skills expertise hourlyRate timezone experience';
+    const projection = '_id fullName bio avatar skills expertise hourlyRate timezone experience isApproved';
 
     const total = await User.countDocuments(query);
 
