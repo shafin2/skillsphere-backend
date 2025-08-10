@@ -14,6 +14,11 @@ const fallbackResponses = [
 
 // Specialized fallback responses for different mentor types
 const specializedFallbackResponses = {
+  'general': [
+    "While I'm having technical difficulties, remember that effective learning often involves breaking complex topics into smaller, manageable chunks. Try focusing on one concept at a time.",
+    "I'm temporarily unavailable, but consider using the Feynman Technique - try explaining the concept you're learning to someone else or even to yourself in simple terms.",
+    "Although I can't assist right now, remember that consistent practice and regular review are key to mastering any skill. Set up a study schedule that works for you."
+  ],
   'software-dev': [
     "While I'm having technical difficulties, I'd recommend checking the official documentation for your specific technology stack. Stack Overflow and GitHub issues are also excellent resources for debugging.",
     "I'm temporarily unavailable, but consider using console.log() statements to debug your code step by step. The browser's developer tools are your best friend for troubleshooting.",

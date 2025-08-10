@@ -317,8 +317,7 @@ exports.getTranscript = async (req, res, next) => {
     const { sessionId } = req.params;
     const userId = req.user.id;
 
-    const session = await Session.findById(sessionId)
-      .populate('transcriptId');
+    const session = await Session.findById(sessionId);
 
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found' });
@@ -329,9 +328,17 @@ exports.getTranscript = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
+    // Find transcript by sessionId
+    const Transcript = require('../models/Transcript');
+    const transcript = await Transcript.findOne({ sessionId: sessionId });
+
+    if (!transcript) {
+      return res.status(404).json({ success: false, message: 'Transcript not found for this session' });
+    }
+
     res.json({
       success: true,
-      transcript: session.transcriptId
+      transcript: transcript
     });
   } catch (error) {
     next(error);

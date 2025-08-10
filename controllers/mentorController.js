@@ -41,6 +41,7 @@ exports.getMentors = async (req, res, next) => {
       skill,
       expertise,
       timezone,
+      rating,
       rateMin,
       rateMax,
       page = 1,
@@ -68,6 +69,9 @@ exports.getMentors = async (req, res, next) => {
       query.timezone = timezone;
     }
 
+    // Note: Rating filtering will be done after calculating average ratings
+    // since we need to calculate the average from the ratings array
+
     const hourly = {};
     const hasMin = typeof rateMin === 'string' && rateMin.trim() !== '';
     const hasMax = typeof rateMax === 'string' && rateMax.trim() !== '';
@@ -81,7 +85,7 @@ exports.getMentors = async (req, res, next) => {
     }
     if (Object.keys(hourly).length) query.hourlyRate = hourly;
 
-    const projection = '_id fullName bio avatar skills expertise hourlyRate timezone experience isApproved';
+    const projection = '_id fullName bio avatar skills expertise hourlyRate timezone experience isApproved ratings';
 
     const total = await User.countDocuments(query);
 
@@ -91,6 +95,35 @@ exports.getMentors = async (req, res, next) => {
       .skip((numericPage - 1) * numericLimit)
       .limit(numericLimit)
       .lean();
+
+    // Calculate average rating for each mentor
+    mentors.forEach(mentor => {
+      if (mentor.ratings && mentor.ratings.length > 0) {
+        const totalRating = mentor.ratings.reduce((sum, rating) => sum + rating.rating, 0);
+        mentor.rating = totalRating / mentor.ratings.length;
+      } else {
+        mentor.rating = null;
+      }
+    });
+
+    // Apply rating filter after calculating average ratings
+    if (rating && typeof rating === 'string') {
+      const ratingNum = Number(rating);
+      if (!Number.isNaN(ratingNum)) {
+        const filteredMentors = mentors.filter(mentor => mentor.rating && mentor.rating >= ratingNum);
+        const totalFiltered = await User.countDocuments({
+          ...query,
+          ratings: { $exists: true, $ne: [] }
+        });
+        
+        return res.json({
+          success: true,
+          mentors: filteredMentors,
+          totalPages: Math.max(Math.ceil(totalFiltered / numericLimit), 1),
+          currentPage: numericPage
+        });
+      }
+    }
 
     const totalPages = Math.max(Math.ceil(total / numericLimit), 1);
 

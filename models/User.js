@@ -91,6 +91,23 @@ const UserSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    ratings: [{
+      rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true
+      },
+      comment: {
+        type: String,
+        trim: true,
+        maxlength: 500
+      },
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }],
     isProfileComplete: {
       type: Boolean,
       default: false

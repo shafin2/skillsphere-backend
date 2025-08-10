@@ -76,18 +76,35 @@ router.get('/mentor/:mentorId', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const skip = (page - 1) * limit;
 
+    console.log('Fetching feedback for mentor ID:', mentorId);
+
     if (!mongoose.Types.ObjectId.isValid(mentorId)) {
+      console.log('Invalid mentor ID format');
       return res.status(400).json({ error: 'Invalid mentor ID' });
     }
 
-    // Get feedback without learner information (anonymized)
-    const feedbacks = await Feedback.find({ mentorId })
-      .select('rating comment createdAt') // Only include the fields we want
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Get mentor with ratings from User model
+    const mentor = await User.findById(mentorId).select('ratings name');
+    
+    if (!mentor) {
+      console.log('Mentor not found');
+      return res.status(404).json({ error: 'Mentor not found' });
+    }
 
-    const total = await Feedback.countDocuments({ mentorId });
+    console.log(`Found mentor: ${mentor.name} with ${mentor.ratings?.length || 0} ratings`);
+
+    const allRatings = mentor.ratings || [];
+    const total = allRatings.length;
+    
+    // Sort by date (newest first) and paginate
+    const sortedRatings = allRatings.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const feedbacks = sortedRatings.slice(skip, skip + limit).map(rating => ({
+      rating: rating.rating,
+      comment: rating.comment,
+      createdAt: rating.date
+    }));
+
+    console.log(`Returning ${feedbacks.length} feedbacks out of ${total} total`);
 
     res.json({
       feedbacks,
@@ -115,31 +132,33 @@ router.get('/mentor/:mentorId/stats', async (req, res) => {
       return res.status(400).json({ error: 'Invalid mentor ID' });
     }
 
-    const stats = await Feedback.getMentorAverageRating(mentorId);
+    // Get mentor with ratings from User model
+    const mentor = await User.findById(mentorId).select('ratings');
+    
+    if (!mentor) {
+      return res.status(404).json({ error: 'Mentor not found' });
+    }
+
+    const allRatings = mentor.ratings || [];
+    const totalReviews = allRatings.length;
+    
+    let averageRating = 0;
+    if (totalReviews > 0) {
+      const totalRatingSum = allRatings.reduce((sum, rating) => sum + rating.rating, 0);
+      averageRating = totalRatingSum / totalReviews;
+    }
 
     // Get rating distribution
-    const ratingDistribution = await Feedback.aggregate([
-      { $match: { mentorId: new mongoose.Types.ObjectId(mentorId) } },
-      {
-        $group: {
-          _id: '$rating',
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { _id: -1 } }
-    ]);
-
-    const distribution = {};
-    for (let i = 1; i <= 5; i++) {
-      distribution[i] = 0;
-    }
-    ratingDistribution.forEach(item => {
-      distribution[item._id] = item.count;
+    const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    allRatings.forEach(rating => {
+      if (distribution[rating.rating] !== undefined) {
+        distribution[rating.rating]++;
+      }
     });
 
     res.json({
-      averageRating: stats.averageRating || 0,
-      totalReviews: stats.totalReviews || 0,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
+      totalReviews,
       ratingDistribution: distribution
     });
 
