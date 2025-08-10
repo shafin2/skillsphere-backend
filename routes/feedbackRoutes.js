@@ -82,7 +82,7 @@ router.get('/mentor/:mentorId', async (req, res) => {
 
     // Get feedback without learner information (anonymized)
     const feedbacks = await Feedback.find({ mentorId })
-      .select('rating comment createdAt -learnerId') // Exclude learner ID for anonymity
+      .select('rating comment createdAt') // Only include the fields we want
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);

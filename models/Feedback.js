@@ -38,7 +38,6 @@ const FeedbackSchema = new mongoose.Schema({
 
 // Index for efficient queries
 FeedbackSchema.index({ mentorId: 1, createdAt: -1 });
-FeedbackSchema.index({ bookingId: 1 });
 FeedbackSchema.index({ learnerId: 1 });
 
 // Static method to get mentor's average rating

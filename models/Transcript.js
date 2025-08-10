@@ -107,8 +107,6 @@ const TranscriptSchema = new mongoose.Schema(
 );
 
 // Index for efficient queries
-TranscriptSchema.index({ bookingId: 1 });
-TranscriptSchema.index({ sessionId: 1 });
 TranscriptSchema.index({ 'participants.learner.userId': 1 });
 TranscriptSchema.index({ 'participants.mentor.userId': 1 });
 TranscriptSchema.index({ createdAt: -1 });
