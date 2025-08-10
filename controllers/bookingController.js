@@ -2,6 +2,15 @@ const Booking = require('../models/Booking');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 
+// Conditionally import session controller to avoid errors
+let createSession;
+try {
+  const sessionController = require('./sessionController');
+  createSession = sessionController.createSession;
+} catch (error) {
+  console.log('Session controller not available yet, sessions will be created when ready');
+}
+
 // Helper function to create notifications
 const createNotification = async (userId, type, bookingId, mentorName, learnerName, bookingDate, bookingTime) => {
   const messages = {
@@ -217,6 +226,19 @@ exports.confirmBooking = async (req, res, next) => {
     const updatedBooking = await Booking.findById(id)
       .populate('mentorId', 'fullName avatar')
       .populate('learnerId', 'fullName avatar');
+
+    // Create session for chat and video call if available
+    if (createSession) {
+      try {
+        await createSession(booking._id);
+        console.log('Session created successfully for booking:', booking._id);
+      } catch (sessionError) {
+        console.error('Error creating session:', sessionError);
+        // Don't fail the booking confirmation if session creation fails
+      }
+    } else {
+      console.log('Session creation not available yet, booking confirmed without session');
+    }
 
     // Create notification for learner
     await createNotification(
