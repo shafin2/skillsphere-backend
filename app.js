@@ -18,6 +18,7 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const callRoutes = require('./routes/callRoutes');
 const transcriptRoutes = require('./routes/transcriptRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -46,6 +47,7 @@ app.use('/sessions', sessionRoutes);
 app.use('/call', callRoutes);
 app.use('/transcript', transcriptRoutes);
 app.use('/feedback', feedbackRoutes);
+app.use('/ai', aiRoutes);
 
 // Central error handler
 app.use(errorHandler);

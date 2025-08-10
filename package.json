@@ -24,6 +24,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "agora-access-token": "^2.0.4",
     "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
